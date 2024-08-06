@@ -1,18 +1,20 @@
 import 'package:meena/feature/models/widget_model.dart';
 
 class Dashboard {
-  final int dashboardId;
-  final String name;
-  final int layoutId;
-  final List<WidgetModel> widgets;
-  final List<dynamic> devices; // Change type based on actual data
+  final int? dashboardId;
+  final String? name;
+  final int? layoutId;
+  final Layout? layout;
+  final List<WidgetModel>? widgets;
+  final List<dynamic>? devices; // Adjust the type based on actual data
 
   Dashboard({
-    required this.dashboardId,
-    required this.name,
-    required this.layoutId,
-    required this.widgets,
-    required this.devices,
+    this.dashboardId,
+    this.name,
+    this.layoutId,
+    this.layout,
+    this.widgets,
+    this.devices,
   });
 
   factory Dashboard.fromJson(Map<String, dynamic> json) {
@@ -20,10 +22,11 @@ class Dashboard {
       dashboardId: json['dashboardId'],
       name: json['name'],
       layoutId: json['layoutId'],
-      widgets: (json['widgets'] as List)
-          .map((e) => WidgetModel.fromJson(e))
-          .toList(),
-      devices: json['devices'], // Change type based on actual data
+      layout: json['layout'] != null ? Layout.fromJson(json['layout']) : null,
+      widgets: json['widgets'] != null
+          ? (json['widgets'] as List).map((i) => WidgetModel.fromJson(i)).toList()
+          : null,
+      devices: json['devices'], // Adjust if necessary based on actual data
     );
   }
 
@@ -32,8 +35,50 @@ class Dashboard {
       'dashboardId': dashboardId,
       'name': name,
       'layoutId': layoutId,
-      'widgets': widgets.map((e) => e.toJson()).toList(),
+      'layout': layout?.toJson(),
+      'widgets': widgets?.map((i) => i.toJson()).toList(),
       'devices': devices,
+    };
+  }
+}
+
+
+class Layout {
+  final int? layoutId;
+  final String? name;
+  final int? numOfWidgets;
+  final bool? isDefault;
+  final List<Dashboard?>? dashboards;
+
+  Layout({
+    this.layoutId,
+    this.name,
+    this.numOfWidgets,
+    this.isDefault,
+    this.dashboards,
+  });
+
+  factory Layout.fromJson(Map<String, dynamic> json) {
+    return Layout(
+      layoutId: json['layoutId'],
+      name: json['name'],
+      numOfWidgets: json['numOfWidgets'],
+      isDefault: json['isDefault'],
+      dashboards: json['dashboards'] != null
+          ? (json['dashboards'] as List)
+              .map((i) => i != null ? Dashboard.fromJson(i) : null)
+              .toList()
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'layoutId': layoutId,
+      'name': name,
+      'numOfWidgets': numOfWidgets,
+      'isDefault': isDefault,
+      'dashboards': dashboards?.map((i) => i?.toJson()).toList(),
     };
   }
 }

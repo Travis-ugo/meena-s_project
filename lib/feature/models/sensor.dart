@@ -98,3 +98,5 @@ class SensorData {
     };
   }
 }
+
+//  {dashboardId: 1, name: Dashboard 1, layoutId: 1, layout: {layoutId: 1, name: Single Widget, numOfWidgets: 1, isDefault: true, dashboards: [null]}, widgets: [{widgetId: 1, name: line chart, type: 2, graphParameters: {}, dashboardId: 1, modalities: [{modalityId: 3debe2e0-8d5d-4f92-87b5-08dc5533dbcb, tenantId: tinkerblox, name: Demo_Sensor_01_Pressure, type: 1, sensorId: 103b7c99-4bbd-4dc7-ab00-24760a15d6ae, widgets: [null]}, {modalityId: bbd4f80d-50ca-4cd6-87b6-08dc5533dbcb, tenantId: tinkerblox, name: Demo_Sensor_01_Temperature, type: 0, sensorId: 103b7c99-4bbd-4dc7-ab00-24760a15d6ae, widgets: [null]}]}], devices: []}

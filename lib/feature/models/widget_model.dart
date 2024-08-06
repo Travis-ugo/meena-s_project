@@ -1,20 +1,20 @@
 import 'package:meena/feature/models/modality.dart';
 
 class WidgetModel {
-  final int widgetId;
-  final String name;
-  final int type;
-  final String graphParameters;
-  final int dashboardId;
-  final List<Modality> modalities;
+  final int? widgetId;
+  final String? name;
+  final int? type;
+  final String? graphParameters;
+  final int? dashboardId;
+  final List<Modality>? modalities;
 
   WidgetModel({
-    required this.widgetId,
-    required this.name,
-    required this.type,
-    required this.graphParameters,
-    required this.dashboardId,
-    required this.modalities,
+    this.widgetId,
+    this.name,
+    this.type,
+    this.graphParameters,
+    this.dashboardId,
+    this.modalities,
   });
 
   factory WidgetModel.fromJson(Map<String, dynamic> json) {
@@ -24,9 +24,9 @@ class WidgetModel {
       type: json['type'],
       graphParameters: json['graphParameters'],
       dashboardId: json['dashboardId'],
-      modalities: (json['modalities'] as List)
-          .map((i) => Modality.fromJson(i))
-          .toList(),
+      modalities: json['modalities'] != null
+          ? (json['modalities'] as List).map((i) => Modality.fromJson(i)).toList()
+          : null,
     );
   }
 
@@ -37,10 +37,7 @@ class WidgetModel {
       'type': type,
       'graphParameters': graphParameters,
       'dashboardId': dashboardId,
-      'modalities': modalities.map((e) => e.toJson()).toList(),
+      'modalities': modalities?.map((e) => e.toJson()).toList(),
     };
   }
 }
-
-
-
