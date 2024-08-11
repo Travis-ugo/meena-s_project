@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:meena/feature/models/sensor.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -35,16 +34,12 @@ class _ChartPageState extends State<ChartPage> {
     _zoomPanBehavior = ZoomPanBehavior(
         enableDoubleTapZooming: true,
         enablePinching: true,
-        // Enables the selection zooming
         enableSelectionZooming: true);
 
     for (var element in widget.sensordata) {
-      if (element.d != null && element.d!.isNotEmpty) {
-        chartData.add(ChartData(element.ts!, element.d![0]));
-        print("chartData");
-        print(chartData);
+      if (element.d.isNotEmpty && element.d.isNotEmpty) {
+        chartData.add(ChartData(element.ts, element.d[0]));
       }
-      //chartData.sort((a, b) => b.x.compareTo(a.x));
     }
 
     super.initState();
@@ -148,42 +143,37 @@ class _ChartPageState extends State<ChartPage> {
     );
   }
 
-  String timestamp_convert(int timestamp) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    String formattedTime = DateFormat('HH:mm').format(dateTime);
-    String formattedMonth = DateFormat('MMMM').format(dateTime);
-    String formattedDay = DateFormat('d').format(dateTime);
-    String formattedYear = DateFormat('y').format(dateTime);
-
-    return '$formattedTime - $formattedMonth - $formattedDay - $formattedYear';
-  }
-
   void _enableFullscreen(bool fullscreen, Widget chartWidget) async {
     isFullscreen = fullscreen;
     if (fullscreen) {
-      // Force landscape orientation for fullscreen
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-      await Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-        return FullScreenViewPage(
-          chartWidget: chartWidget,
-        );
-      }));
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
+      SystemChrome.setPreferredOrientations(
+        [
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ],
+      );
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) {
+            return FullScreenViewPage(
+              chartWidget: chartWidget,
+            );
+          },
+        ),
+      );
+      SystemChrome.setPreferredOrientations(
+        [
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ],
+      );
     } else {
-      // Force portrait
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
-      // Set preferred orientation to device default
-      // Empty list causes the application to defer to the operating system default.
-      // See: https://api.flutter.dev/flutter/services/SystemChrome/setPreferredOrientations.html
+      SystemChrome.setPreferredOrientations(
+        [
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ],
+      );
       SystemChrome.setPreferredOrientations([]);
     }
   }

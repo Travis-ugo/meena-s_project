@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+//  //import 'dart:developer';
 
 import 'package:meena/feature/models/dash_board_model.dart';
 import 'package:http/http.dart' as http;
@@ -15,10 +15,10 @@ class ApiService {
   Future<List<Dashboard>> fetchDashboards() async {
     const String url = 'https://dev.tinkerblox.io/api/Dashboard';
 
-    log('Starting to fetch dashboards');
+    // log('Starting to fetch dashboards');
 
     try {
-      log('trying');
+      // log('trying');
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -26,18 +26,18 @@ class ApiService {
         },
       );
 
-      log('HTTP request complete with status: ${response.statusCode}');
+      // log('HTTP request complete with status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body) as List;
 
         return data.map((json) => Dashboard.fromJson(json)).toList();
       } else {
-        log('Failed to load dashboards. Status code: ${response.statusCode}');
+        // log('Failed to load dashboards. Status code: ${response.statusCode}');
         throw Exception('Failed to load dashboards');
       }
     } catch (e) {
-      log('Error occurred while fetching dashboards: $e');
+      // log('Error occurred while fetching dashboards: $e');
       throw Exception('Error fetching dashboards: $e');
     }
   }
@@ -72,12 +72,12 @@ class ApiService {
         
         return Dashboard.fromJson(data);
       } else {
-        log('Failed to load dashboards. Status code: ${response.statusCode}');
+        // log('Failed to load dashboards. Status code: ${response.statusCode}');
         throw Exception('Failed to load dashboards');
       }
       
     } catch (e) {
-      log('Error occurred while fetching dashboards: $e');
+      // log('Error occurred while fetching dashboards: $e');
       throw Exception('Error fetching dashboards: $e');
     }
   }
