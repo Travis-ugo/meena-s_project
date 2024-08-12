@@ -7,11 +7,15 @@ abstract class MeenaEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadDataDashboardEvent extends MeenaEvent {}
+class LoadDataDashboardEvent extends MeenaEvent {
+  const LoadDataDashboardEvent({this.index = 0});
+  final int index;
+}
 
 class LoadDashboardForTabEvent extends MeenaEvent {}
 
 class LoadDashboardForTab extends MeenaEvent {
-  const LoadDashboardForTab({required this.dashboardId});
-  final int dashboardId;
+  const LoadDashboardForTab({this.dashboardId, this.index});
+  final int? dashboardId;
+  final int? index;
 }

@@ -6,3 +6,10 @@ class WidgetWithName {
   final List<SensorData> sensorDataList;
   final String widgetName;
 }
+
+class CorrectSensorData {
+  const CorrectSensorData(
+      {required this.sensorDataList, required this.widgetName});
+  final List<SensorData> sensorDataList;
+  final String widgetName;
+}

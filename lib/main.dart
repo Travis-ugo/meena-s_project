@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meena/feature/bloc/meena_bloc.dart';
 import 'package:meena/feature/presentation/home_screen.dart';
 import 'package:meena/feature/services/api_service.dart';
 
@@ -22,16 +21,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepositoryProvider.value(
       value: apiService,
-      child: BlocProvider(
-        create: (context) => MeenaBloc(apiService),
-        child: MaterialApp(
-          title: 'Flutter Demo',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-            useMaterial3: true,
-          ),
-          home: const HomeScreen(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
         ),
+        home: HomeApp(apiService: apiService),
       ),
     );
   }

@@ -1,13 +1,27 @@
-import 'dart:nativewrappers/_internal/vm/lib/developer.dart';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:meena/feature/models/dash_board_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meena/feature/bloc/meena_bloc.dart';
 import 'package:meena/feature/models/sensor.dart';
-import 'package:meena/feature/models/widget_model.dart';
-import 'package:meena/feature/models/widget_with_name.dart';
 import 'package:meena/feature/presentation/chart.dart';
 import 'package:meena/feature/services/api_service.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+class HomeApp extends StatelessWidget {
+  const HomeApp({super.key, required this.apiService});
+
+  final ApiService apiService;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) =>
+          MeenaBloc(apiService)..add(const LoadDataDashboardEvent()),
+      child: const HomeScreen(),
+    );
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,82 +30,41 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
-  final ApiService apiService = ApiService();
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   TabController? _tabController;
-  bool isLoading = true;
-  List<Dashboard> _dashboards = [];
-  Map<int, Dashboard> _dashboardData = {};
-  Map<int, WidgetWithName> sensorDataMap = {};
   SfCartesianChart? _chart;
-  List<SensorData> sensorDataList = [];
-  List<WidgetModel> widgets = [];
 
   @override
   void initState() {
     super.initState();
-    _loadDashboards();
   }
 
-  Future<void> _loadDashboards() async {
-    List<Dashboard> dashboards = await apiService.fetchDashboards();
+  void _initializeTabController(int length) {
+    _tabController = TabController(length: length, vsync: this);
+    _tabController?.addListener(_handleTabSelection);
+    int initialIndex = _tabController!.index;
+    int dashboardId =
+        context.read<MeenaBloc>().state.dashboards[initialIndex].dashboardId!;
 
-    setState(
-      () {
-        _dashboards = dashboards;
-        isLoading = false;
-        _tabController = TabController(length: _dashboards.length, vsync: this);
-        _tabController?.addListener(_handleTabSelection);
-      },
-    );
-
-    if (_tabController?.index != null) {
-      int initialIndex = _tabController!.index;
-      int dashboardId = _dashboards[initialIndex].dashboardId!;
-      _loadDashboardForTab(dashboardId);
-    }
+    BlocProvider.of<MeenaBloc>(context)
+        .add(LoadDashboardForTab(dashboardId: dashboardId));
   }
 
   void _handleTabSelection() {
     if (_tabController!.indexIsChanging) {
       int selectedIndex = _tabController!.index;
-      int dashboardId = _dashboards[selectedIndex].dashboardId!;
-      _loadDashboardForTab(dashboardId);
-    }
-  }
-
-  Future<void> _loadDashboardForTab(int dashboardId) async {
-    log("API CALLED");
-    Dashboard dashboard = await apiService.postDashBoardId(dashboardId);
-
-    setState(
-      () {
-        _dashboardData[dashboardId] = dashboard;
-      },
-    );
-
-    List<Future<WidgetModel>> widgetFutures = dashboard.widgets!.map(
-      (widget) {
-        return apiService.fetchWidget(widgetId: "${widget.widgetId}");
-      },
-    ).toList();
-
-    widgets = await Future.wait(widgetFutures);
-
-    for (int i = 0; i < widgets.length; i++) {
-      WidgetModel widget = widgets[i];
-      if (widget.modalities != null) {
-        for (var modality in widget.modalities!) {
-          var addSensorDataList = await apiService.fetchSensorData(
-              modalitiesId: modality.modalityId!);
-          sensorDataList.addAll(addSensorDataList);
-          setState(() {
-            sensorDataMap[dashboardId] = WidgetWithName(
-                sensorDataList: sensorDataList,
-                widgetName: widget.name ?? "EMPTY");
-          });
-        }
+      int dashboardId = context
+          .read<MeenaBloc>()
+          .state
+          .dashboards[selectedIndex]
+          .dashboardId!;
+      if (!context
+          .read<MeenaBloc>()
+          .state
+          .dashboardData
+          .containsKey(dashboardId)) {
+        BlocProvider.of<MeenaBloc>(context)
+            .add(LoadDashboardForTab(dashboardId: dashboardId));
       }
     }
   }
@@ -105,42 +78,60 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? Container(
+    return BlocBuilder<MeenaBloc, MeenaState>(
+      builder: (context, state) {
+        if (state.isLoading) {
+          return Container(
             color: Colors.white,
             child: const Center(
               child: CircularProgressIndicator(),
             ),
-          )
-        : DefaultTabController(
-            length: _dashboards.length,
-            child: Scaffold(
-              appBar: AppBar(
-                title: const Text("Meena's Project"),
-                bottom: TabBar(
-                  controller: _tabController,
-                  tabs: _dashboards.map((tab) {
-                    return Tab(text: tab.name);
-                  }).toList(),
-                ),
-              ),
-              body: TabBarView(
+          );
+        }
+        if (_tabController == null && state.dashboards.isNotEmpty) {
+          _initializeTabController(state.dashboards.length);
+        }
+
+        return DefaultTabController(
+          length: state.dashboards.length,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text("Meena's Project"),
+              bottom: TabBar(
                 controller: _tabController,
-                children: _dashboards.map((tab) {
+                tabs: state.dashboards.map((tab) {
+                  return Tab(text: tab.name);
+                }).toList(),
+              ),
+            ),
+            body: TabBarView(
+              controller: _tabController,
+              children: state.dashboards.map(
+                (tab) {
+                  // print('${tab.dashboardId!} :::::::::::::::::::');
                   int dashboardId = tab.dashboardId!;
+
                   return Visibility(
                     replacement: const Center(
                       child: CircularProgressIndicator(),
                     ),
-                    visible: _dashboardData.containsKey(dashboardId),
-                    child: sensorDataMap[dashboardId] != null
-                        ? ListView.builder(
-                            itemCount: widgets.length,
+                    visible: state.dashboardData.containsKey(dashboardId),
+                    child: state.sensorDataMap[dashboardId] != null
+                        ?
+
+                        // Center(
+                        //     child: Text('${state.sensorDataList.length}'),
+                        //   )
+
+                        ListView.builder(
+                            itemCount: state.widgets.length,
                             itemBuilder: (context, index) {
-                              List<SensorData> sensorList =
-                                  sensorDataMap[dashboardId]!.sensorDataList;
+                              // return
+
+                              List<SensorData> sensorList = state
+                                  .sensorDataMap[dashboardId]!.sensorDataList;
                               String sensorName =
-                                  sensorDataMap[dashboardId]!.widgetName;
+                                  state.sensorDataMap[dashboardId]!.widgetName;
                               if (_chart == null) {
                                 _chart = SfCartesianChart(
                                   primaryXAxis: const CategoryAxis(),
@@ -166,20 +157,24 @@ class _HomeScreenState extends State<HomeScreen>
                                   ],
                                 );
                               } else {
-                                log('ERROR NOWNOWNOW');
+                                // log('ERROR NOWNOWNOW');
                               }
                               return ChartPage(
-                                  chartType: sensorName,
-                                  sensordata: sensorList);
+                                chartType: sensorName,
+                                sensordata: sensorList,
+                              );
                             },
                           )
                         : const Center(
                             child: Text('Empty'),
                           ),
                   );
-                }).toList(),
-              ),
+                },
+              ).toList(),
             ),
-          );
+          ),
+        );
+      },
+    );
   }
 }
