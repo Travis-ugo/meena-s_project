@@ -1,5 +1,4 @@
 import 'dart:convert';
-//  //import 'dart:developer';
 
 import 'package:meena/feature/models/dash_board_model.dart';
 import 'package:http/http.dart' as http;
@@ -15,29 +14,21 @@ class ApiService {
   Future<List<Dashboard>> fetchDashboards() async {
     const String url = 'https://dev.tinkerblox.io/api/Dashboard';
 
-    // log('Starting to fetch dashboards');
-
     try {
-      // log('trying');
       final response = await http.get(
         Uri.parse(url),
         headers: {
           'Authorization': 'Bearer $token',
         },
       );
-
-      // log('HTTP request complete with status: ${response.statusCode}');
-
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body) as List;
 
         return data.map((json) => Dashboard.fromJson(json)).toList();
       } else {
-        // log('Failed to load dashboards. Status code: ${response.statusCode}');
         throw Exception('Failed to load dashboards');
       }
     } catch (e) {
-      // log('Error occurred while fetching dashboards: $e');
       throw Exception('Error fetching dashboards: $e');
     }
   }
@@ -52,32 +43,17 @@ class ApiService {
         'Content-Type': 'multipart/form-data',
       };
       request.headers.addAll(requestHeaders);
-
-      // Add the dashboardId to the form data
       request.fields['dashboardId'] = dashboardId.toString();
-
-      // Send the request and wait for the response
       final response = await request.send();
-
-      // Read the response
       final responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 200) {
-
-        
         var data = jsonDecode(responseBody);
-
-
-        // log("VALUEEEE:::: $data");
-        
         return Dashboard.fromJson(data);
       } else {
-        // log('Failed to load dashboards. Status code: ${response.statusCode}');
         throw Exception('Failed to load dashboards');
       }
-      
     } catch (e) {
-      // log('Error occurred while fetching dashboards: $e');
       throw Exception('Error fetching dashboards: $e');
     }
   }

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -46,11 +44,11 @@ class _ChartPageState extends State<ChartPage> {
     widget.modalityData.forEach((key, value) {
       for (var element in value) {
         if (element.d.isNotEmpty) {
-          print("key: $key");
+          // print("key: $key");
           data.add(ChartData(timestamp_convert(element.ts), element.d[0]));
           data.sort((a, b) => a.x.compareTo(b.x));
           chartData[key] = data;
-          print(chartData[key]);
+          // print(chartData[key]);
         }
         //chartData.sort((a, b) => b.x.compareTo(a.x));
       }

@@ -1,9 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meena/feature/bloc/meena_bloc.dart';
 import 'package:meena/feature/models/sensor.dart';
-import 'package:meena/feature/presentation/chart.dart';
+import 'package:meena/feature/views/chart.dart';
 import 'package:meena/feature/services/api_service.dart';
+import 'package:meena/feature/view_models/provider_api_service.dart';
+import 'package:provider/provider.dart';
 
 class HomeApp extends StatelessWidget {
   const HomeApp({super.key, required this.apiService});
@@ -12,9 +14,8 @@ class HomeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          MeenaBloc(apiService)..add(const LoadDataDashboardEvent()),
+    return ChangeNotifierProvider(
+      create: (context) => MeenaProvider(apiService)..loadDataDashboard(),
       child: const HomeScreen(),
     );
   }
@@ -40,27 +41,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _tabController?.addListener(_handleTabSelection);
     int initialIndex = _tabController!.index;
     int dashboardId =
-        context.read<MeenaBloc>().state.dashboards[initialIndex].dashboardId!;
+        context.read<MeenaProvider>().dashboards[initialIndex].dashboardId!;
 
-    BlocProvider.of<MeenaBloc>(context)
-        .add(LoadDashboardForTab(dashboardId: dashboardId));
+    context.read<MeenaProvider>().loadDashboardForTab(dashboardId);
   }
 
   void _handleTabSelection() {
     if (_tabController!.indexIsChanging) {
       int selectedIndex = _tabController!.index;
-      int dashboardId = context
-          .read<MeenaBloc>()
-          .state
-          .dashboards[selectedIndex]
-          .dashboardId!;
+      int dashboardId =
+          context.read<MeenaProvider>().dashboards[selectedIndex].dashboardId!;
       if (!context
-          .read<MeenaBloc>()
-          .state
+          .read<MeenaProvider>()
           .dashboardData
           .containsKey(dashboardId)) {
-        BlocProvider.of<MeenaBloc>(context)
-            .add(LoadDashboardForTab(dashboardId: dashboardId));
+        context.read<MeenaProvider>().loadDashboardForTab(dashboardId);
       }
     }
   }
@@ -74,9 +69,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MeenaBloc, MeenaState>(
-      builder: (context, state) {
-        if (state.isLoading) {
+    return Consumer<MeenaProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
           return Container(
             color: Colors.white,
             child: const Center(
@@ -84,45 +79,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           );
         }
-        if (_tabController == null && state.dashboards.isNotEmpty) {
-          _initializeTabController(state.dashboards.length);
+        if (_tabController == null && provider.dashboards.isNotEmpty) {
+          _initializeTabController(provider.dashboards.length);
         }
 
         return DefaultTabController(
-          length: state.dashboards.length,
+          length: provider.dashboards.length,
           child: Scaffold(
             appBar: AppBar(
               title: const Text("Meena's Project"),
               bottom: TabBar(
                 controller: _tabController,
-                tabs: state.dashboards.map((tab) {
+                tabs: provider.dashboards.map((tab) {
                   return Tab(text: tab.name);
                 }).toList(),
               ),
             ),
             body: TabBarView(
               controller: _tabController,
-              children: state.dashboards.map(
+              children: provider.dashboards.map(
                 (tab) {
                   int dashboardId = tab.dashboardId!;
-                  Map<String, Map<String, List<SensorData>>>? sensorDataMap =
-                      state.dashboardSensorDataMap[dashboardId];
 
+                  log('${provider.dashboardSensorDataMap}');
                   return Visibility(
                     replacement: const Center(
                       child: CircularProgressIndicator(),
                     ),
-                    visible: state.dashboardData.containsKey(dashboardId),
-                    child: sensorDataMap != null
+                    visible: provider.dashboardData.containsKey(dashboardId),
+                    child: provider.dashboardSensorDataMap[dashboardId]
+                                ?.isNotEmpty ??
+                            false
                         ? ListView.builder(
-                            itemCount: sensorDataMap.length,
+                            itemCount: provider
+                                .dashboardSensorDataMap[dashboardId]?.length,
                             itemBuilder: (context, index) {
-                              String chartType =
-                                  sensorDataMap.keys.elementAt(index);
-
-                              // log("sensor Data for index one:::: ${sensorDataMap['trend chart']!}");
+                              String chartType = provider
+                                  .dashboardSensorDataMap[dashboardId]!.keys
+                                  .elementAt(index);
                               Map<String, List<SensorData>> modalityData =
-                                  sensorDataMap[chartType]!;
+                                  provider.dashboardSensorDataMap[dashboardId]![
+                                      chartType]!;
 
                               return ChartPage(
                                 chartType: chartType,
@@ -130,9 +127,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               );
                             },
                           )
-                        : const ChartPage(
-                            chartType: 'No Data',
-                            modalityData: {},
+                        : const Center(
+                            child: Text(
+                              "NO DATA",
+                              style: TextStyle(fontSize: 24),
+                            ),
                           ),
                   );
                 },
