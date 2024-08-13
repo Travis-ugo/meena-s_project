@@ -6,43 +6,36 @@ class MeenaState extends Equatable {
     this.dashboards = const <Dashboard>[],
     this.isLoading = false,
     this.dashboardData = const {},
-    this.sensorDataMap = const {},
-    this.sensorDataList = const [],
-    this.widgets = const [],
+    this.dashboardSensorDataMap = const {},
   });
 
   final List<Dashboard> dashboards;
   final bool isLoading;
   final Map<int, Dashboard> dashboardData;
-  final Map<int, WidgetWithName> sensorDataMap;
-  final List<SensorData> sensorDataList;
-  final List<WidgetModel> widgets;
+  final Map<int, Map<String, Map<String, List<SensorData>>>>
+      dashboardSensorDataMap;
 
   @override
   List<Object> get props => [
         dashboards,
         isLoading,
         dashboardData,
-        sensorDataMap,
-        sensorDataList,
-        widgets,
+        dashboardSensorDataMap,
       ];
 
   MeenaState copyWith({
     List<Dashboard>? dashboards,
     bool? isLoading,
     Map<int, Dashboard>? dashboardData,
-    Map<int, WidgetWithName>? sensorDataMap,
-    List<SensorData>? sensorDataList,
-    List<WidgetModel>? widgets,
+    Map<int, Map<String, Map<String, List<SensorData>>>>?
+        dashboardSensorDataMap,
   }) {
     return MeenaState(
       dashboards: dashboards ?? this.dashboards,
       isLoading: isLoading ?? this.isLoading,
       dashboardData: dashboardData ?? this.dashboardData,
-      sensorDataMap: sensorDataMap ?? this.sensorDataMap,
-      sensorDataList: sensorDataList ?? this.sensorDataList,
-      widgets: widgets ?? this.widgets,
+      dashboardSensorDataMap:
+          dashboardSensorDataMap ?? this.dashboardSensorDataMap,
     );
   }
 }

@@ -1,12 +1,9 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meena/feature/bloc/meena_bloc.dart';
 import 'package:meena/feature/models/sensor.dart';
 import 'package:meena/feature/presentation/chart.dart';
 import 'package:meena/feature/services/api_service.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HomeApp extends StatelessWidget {
   const HomeApp({super.key, required this.apiService});
@@ -32,7 +29,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   TabController? _tabController;
-  SfCartesianChart? _chart;
 
   @override
   void initState() {
@@ -108,65 +104,35 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               controller: _tabController,
               children: state.dashboards.map(
                 (tab) {
-                  // print('${tab.dashboardId!} :::::::::::::::::::');
                   int dashboardId = tab.dashboardId!;
+                  Map<String, Map<String, List<SensorData>>>? sensorDataMap =
+                      state.dashboardSensorDataMap[dashboardId];
 
                   return Visibility(
                     replacement: const Center(
                       child: CircularProgressIndicator(),
                     ),
                     visible: state.dashboardData.containsKey(dashboardId),
-                    child: state.sensorDataMap[dashboardId] != null
-                        ?
-
-                        // Center(
-                        //     child: Text('${state.sensorDataList.length}'),
-                        //   )
-
-                        ListView.builder(
-                            itemCount: state.widgets.length,
+                    child: sensorDataMap != null
+                        ? ListView.builder(
+                            itemCount: sensorDataMap.length,
                             itemBuilder: (context, index) {
-                              // return
+                              String chartType =
+                                  sensorDataMap.keys.elementAt(index);
 
-                              List<SensorData> sensorList = state
-                                  .sensorDataMap[dashboardId]!.sensorDataList;
-                              String sensorName =
-                                  state.sensorDataMap[dashboardId]!.widgetName;
-                              if (_chart == null) {
-                                _chart = SfCartesianChart(
-                                  primaryXAxis: const CategoryAxis(),
-                                  title: ChartTitle(text: sensorName),
-                                  legend: const Legend(isVisible: true),
-                                  tooltipBehavior:
-                                      TooltipBehavior(enable: true),
-                                  series: <CartesianSeries<SensorData, String>>[
-                                    LineSeries<SensorData, String>(
-                                      dataSource: sensorList,
-                                      xValueMapper: (SensorData sensor, _) =>
-                                          sensor.d.isNotEmpty
-                                              ? sensor.d.first.toString()
-                                              : 'No Data',
-                                      yValueMapper: (SensorData sensor, _) =>
-                                          sensor.ts,
-                                      name: 'Data',
-                                      dataLabelSettings:
-                                          const DataLabelSettings(
-                                        isVisible: true,
-                                      ),
-                                    )
-                                  ],
-                                );
-                              } else {
-                                // log('ERROR NOWNOWNOW');
-                              }
+                              // log("sensor Data for index one:::: ${sensorDataMap['trend chart']!}");
+                              Map<String, List<SensorData>> modalityData =
+                                  sensorDataMap[chartType]!;
+
                               return ChartPage(
-                                chartType: sensorName,
-                                sensordata: sensorList,
+                                chartType: chartType,
+                                modalityData: modalityData,
                               );
                             },
                           )
-                        : const Center(
-                            child: Text('Empty'),
+                        : const ChartPage(
+                            chartType: 'No Data',
+                            modalityData: {},
                           ),
                   );
                 },
