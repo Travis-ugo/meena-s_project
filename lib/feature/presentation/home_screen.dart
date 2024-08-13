@@ -119,8 +119,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             itemBuilder: (context, index) {
                               String chartType =
                                   sensorDataMap.keys.elementAt(index);
-
-                              // log("sensor Data for index one:::: ${sensorDataMap['trend chart']!}");
                               Map<String, List<SensorData>> modalityData =
                                   sensorDataMap[chartType]!;
 
@@ -130,9 +128,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               );
                             },
                           )
-                        : const ChartPage(
-                            chartType: 'No Data',
-                            modalityData: {},
+                        : const Center(
+                            child: Text(
+                              'EMPTY DATA',
+                              style: TextStyle(fontSize: 24),
+                            ),
                           ),
                   );
                 },
