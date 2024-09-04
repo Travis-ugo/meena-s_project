@@ -24,9 +24,9 @@ class WidgetModel {
       type: json['type'],
       graphParameters: json['graphParameters'],
       dashboardId: json['dashboardId'],
-      modalities: json['modalities'] != null
-          ? (json['modalities'] as List).map((i) => Modality.fromJson(i)).toList()
-          : null,
+      modalities: (json['modalities'] as List<dynamic>?)
+          ?.map((e) => Modality.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 

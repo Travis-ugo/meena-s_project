@@ -1,4 +1,4 @@
-import 'package:meena/feature/models/device_namespace.dart';
+import 'device_namespace.dart';
 
 class Sensor {
   final String sensorId;
@@ -56,7 +56,6 @@ class Sensor {
   }
 }
 
-
 class SensorData {
   final String id;
   final String partitionKey;
@@ -79,9 +78,9 @@ class SensorData {
     return SensorData(
       id: json['id'] as String,
       partitionKey: json['partitionKey'] as String,
-      mi: json['MI'] as String,
-      d: List<double>.from(json['D'].map((x) => x.toDouble())),
-      ts: json['TS'] as int,
+      mi: json['mId'] as String,
+      d: List<double>.from(json['data'].map((x) => x.toDouble())),
+      ts: json['ts'] as int,
       receivedAt: DateTime.parse(json['receivedAt'] as String),
     );
   }
@@ -91,9 +90,9 @@ class SensorData {
     return {
       'id': id,
       'partitionKey': partitionKey,
-      'MI': mi,
-      'D': d,
-      'TS': ts,
+      'mId': mi,
+      'data': d,
+      'ts': ts,
       'receivedAt': receivedAt.toIso8601String(),
     };
   }

@@ -1,6 +1,6 @@
-import 'package:meena/feature/models/widget_model.dart';
+import "./widget_model.dart";
 
-class Dashboard {
+class DashboardModel {
   final int? dashboardId;
   final String? name;
   final int? layoutId;
@@ -8,7 +8,7 @@ class Dashboard {
   final List<WidgetModel>? widgets;
   final List<dynamic>? devices; // Adjust the type based on actual data
 
-  Dashboard({
+  DashboardModel({
     this.dashboardId,
     this.name,
     this.layoutId,
@@ -17,15 +17,16 @@ class Dashboard {
     this.devices,
   });
 
-  factory Dashboard.fromJson(Map<String, dynamic> json) {
-    return Dashboard(
+  factory DashboardModel.fromJson(Map<String, dynamic> json) {
+    return DashboardModel(
       dashboardId: json['dashboardId'],
       name: json['name'],
       layoutId: json['layoutId'],
       layout: json['layout'] != null ? Layout.fromJson(json['layout']) : null,
-      widgets: json['widgets'] != null
-          ? (json['widgets'] as List).map((i) => WidgetModel.fromJson(i)).toList()
-          : null,
+      
+      widgets: (json['widgets'] as List<dynamic>?)
+          ?.map((e) => WidgetModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
       devices: json['devices'], // Adjust if necessary based on actual data
     );
   }
@@ -42,13 +43,12 @@ class Dashboard {
   }
 }
 
-
 class Layout {
   final int? layoutId;
   final String? name;
   final int? numOfWidgets;
   final bool? isDefault;
-  final List<Dashboard?>? dashboards;
+  final List<DashboardModel?>? dashboards;
 
   Layout({
     this.layoutId,
@@ -66,7 +66,7 @@ class Layout {
       isDefault: json['isDefault'],
       dashboards: json['dashboards'] != null
           ? (json['dashboards'] as List)
-              .map((i) => i != null ? Dashboard.fromJson(i) : null)
+              .map((i) => i != null ? DashboardModel.fromJson(i) : null)
               .toList()
           : null,
     );

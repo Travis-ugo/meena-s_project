@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:meena/feature/views/home_screen.dart';
-import 'package:meena/feature/services/api_service.dart';
-
+import 'package:meena/feature/view_models/api_service.dart';
 void main() {
-  var apiService = const ApiService();
+  var apiService = ApiService();
   runApp(
     MyApp(
       apiService: apiService,
@@ -24,7 +22,16 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: HomeApp(apiService: apiService),
+      home: HomeApp(),
     );
+  }
+}
+
+class HomeApp extends StatelessWidget {
+  const HomeApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }
